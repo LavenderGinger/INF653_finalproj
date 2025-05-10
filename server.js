@@ -2,28 +2,24 @@ require('dotenv').config();
 const express = require('express');
 const mongoose = require('mongoose');
 const cors = require('cors');
+const path = require('path');
 const statesRouter = require('./routes/api/states');
 
 const app = express();
 
 app.use(cors());
 app.use(express.json());
+app.use('/states', statesRouter);
 app.use(express.urlencoded({ extended: false }));
 
-app.get('/', (req, res) => {
-    res.send('<h1>Welcome to the US States API</h1>');
+app.get(['/', '/index.html'], (req, res) => {
+    res.sendFile(path.join(__dirname, 'views', 'index.html'));
 });
 
 app.use('/states', statesRouter);
 
-app.all('*', (req, res) => {
-    if (req.accepts('html')) {
-        res.status(404).send('<h1>404 Not Found</h1>');
-    } else if (req.accepts('json')) {
-        res.status(404).json({ error: '404 Not Found' });
-    } else {
-        res.status(404).type('txt').send('404 Not Found');
-    }
+app.use((req, res) => {
+    res.status(404).sendFile(path.join(__dirname, 'views', '404.html'));
 });
 
 const PORT = process.env.PORT || 3500;
